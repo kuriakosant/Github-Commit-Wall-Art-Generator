@@ -1,0 +1,8 @@
+{
+  "message": "HELLO",
+  "start_date": "2025-01-01",
+  "end_date": "2025-04-20",
+  "commit_message": "chore: commit wall art",
+  "font": "banner",
+  "file_name": ".art.txt"
+} 
