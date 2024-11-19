@@ -1,8 +1,33 @@
 {
   "message": "HELLO",
-  "start_date": "2025-01-01",
+  "start_date": "2024-12-29",
   "end_date": "2025-04-20",
-  "commit_message": "chore: commit wall art",
+  "commit_message": "chore: commit wall art – HI",
   "font": "banner",
-  "file_name": ".art.txt"
+  "file_name": ".art.txt",
+  "author_name": "Your Name",
+  "author_email": "you@example.com",
+  "commits_per_day": 5,
+  "manual_positions": [
+    {
+      "col": 0,
+      "start_date": "2024-12-29",
+      "end_date":   "2025-01-04"
+    },
+    {
+      "col": 4,
+      "start_date": "2024-12-29",
+      "end_date":   "2025-01-04"
+    },
+    {
+      "cols": [1, 2, 3],
+      "start_date": "2025-01-01",
+      "end_date":   "2025-01-01"
+    },
+    {
+      "col": 6,
+      "start_date": "2025-02-16",
+      "end_date":   "2025-02-22"
+    }
+  ]
 } 

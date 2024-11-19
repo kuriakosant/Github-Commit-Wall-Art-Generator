@@ -73,7 +73,50 @@ def main():
     # ensure file exists
     open(file_name, "a").close()
 
-    # create commits
+    # ── NEW: how many commits per day
+    commits_per_day = cfg.get("commits_per_day", 1)
+
+    # ── NEW: manual override (skips ASCII art when present)
+    manual = cfg.get("manual_positions")
+    if manual:
+        for entry in manual:
+            # support either a single "col" or multiple "cols"
+            cols = entry.get("cols") or [entry["col"]]
+            start_seg = datetime.fromisoformat(entry["start_date"]).date()
+            end_seg   = datetime.fromisoformat(entry["end_date"]).date()
+            for col in cols:
+                for row in range(7):
+                    d = sunday0 + timedelta(weeks=col, days=row)
+                    d_date = d.date()
+                    if d_date < start_seg or d_date > end_seg:
+                        continue
+
+                    # record the pixel
+                    with open(file_name, "a") as f:
+                        f.write(f"{d_date} • (row {row}, col {col})\n")
+
+                    # build env with back-dated timestamp
+                    commit_time = datetime(d_date.year, d_date.month, d_date.day, 12, 0, 0)
+                    date_str = commit_time.strftime("%Y-%m-%d %H:%M:%S")
+                    env = os.environ.copy()
+                    env.update({
+                        "GIT_AUTHOR_DATE":    date_str,
+                        "GIT_COMMITTER_DATE": date_str,
+                        "GIT_AUTHOR_NAME":    author,
+                        "GIT_AUTHOR_EMAIL":   email,
+                        "GIT_COMMITTER_NAME": author,
+                        "GIT_COMMITTER_EMAIL": email,
+                    })
+
+                    # do N commits for that day
+                    for _ in range(commits_per_day):
+                        subprocess.run(["git", "add", file_name], env=env)
+                        subprocess.run(["git", "commit", "-m", commit_msg], env=env)
+
+                    print(f"✔ {commits_per_day} commits @ {d_date}  (row {row}, col {col})")
+        return  # skip the ASCII art path
+
+    # ── existing ASCII art loop ──
     for col in range(width):
         for row in range(7):
             if art[row][col] != " ":
@@ -98,9 +141,12 @@ def main():
                     "GIT_COMMITTER_NAME": author,
                     "GIT_COMMITTER_EMAIL": email,
                 })
-                subprocess.run(["git", "add", file_name], env=env)
-                subprocess.run(["git", "commit", "-m", commit_msg], env=env)
-                print(f"✔ commit @ {d_date}  (row {row}, col {col})")
+
+                # then:
+                for _ in range(commits_per_day):
+                    subprocess.run(["git", "add", file_name], env=env)
+                    subprocess.run(["git", "commit", "-m", commit_msg], env=env)
+                print(f"✔ {commits_per_day} commits @ {d_date}  (row {row}, col {col})")
 
 if __name__ == "__main__":
     main() 
