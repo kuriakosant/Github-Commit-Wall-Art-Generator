@@ -29,8 +29,7 @@ def ensure_git_repo():
     try:
         subprocess.check_output(
             ["git", "rev-parse", "--is-inside-work-tree"],
-            stderr=subprocess.DEVNULL,
-            check=True
+            stderr=subprocess.DEVNULL
         )
     except subprocess.CalledProcessError:
         print("ERROR: Not a git repository. Run 'git init' first.")
