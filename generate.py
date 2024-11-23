@@ -8,6 +8,8 @@ import json
 import subprocess
 from datetime import datetime, timedelta
 from pyfiglet import Figlet
+import random
+import string
 
 def load_config():
     try:
@@ -95,19 +97,33 @@ def main():
                     })
 
                     for i in range(commits_per_day):
+                        # occasionally remove one random line to force a larger diff
+                        if random.random() < 0.25:
+                            with open(file_name, "r") as f:
+                                lines = f.read().splitlines()
+                            if lines:
+                                idx = random.randrange(len(lines))
+                                del lines[idx]
+                                with open(file_name, "w") as f:
+                                    f.write("\n".join(lines) + "\n")
+
+                        # now append our marker plus an 8-char random suffix
+                        rand_suffix = "".join(
+                            random.choices(string.ascii_letters + string.digits, k=8)
+                        )
                         with open(file_name, "a") as f:
-                            f.write(f"{d_date} • pos:({row},{col}) • commit #{i+1}/{commits_per_day} • entry {entry_idx}\n")
-                        
+                            f.write(
+                                f"{d_date} • pos:({row},{col}) "
+                                f"• commit #{i+1}/{commits_per_day} "
+                                f"• entry {entry_idx} • {rand_suffix}\n"
+                            )
+
                         subprocess.run(["git", "add", file_name], env=env, check=True)
-                        try:
-                            subprocess.run(["git", "commit", "-m", f"{commit_msg} ({d_date} P{i+1})"], env=env, check=True)
-                        except subprocess.CalledProcessError as e:
-                            print(f"ERROR during commit for {d_date} P{i+1}: {e}")
-                            print("This might happen if there are no changes to commit (e.g., file was already committed with identical content).")
-                            print("Check your .gitignore and ensure file_name is being modified uniquely.")
-
-
-                    print(f"✔ {commits_per_day} commit(s) @ {d_date} (row {row}, col {col}) from manual entry {entry_idx}")
+                        subprocess.run(
+                            ["git", "commit", "-m", f"{commit_msg} ({d_date} P{i+1})"],
+                            env=env, check=True
+                        )
+                    print(f"✔ {commits_per_day} commit(s) @ {d_date} (row {row}, col {col})")
         print("Manual positions processed.")
         return
 
